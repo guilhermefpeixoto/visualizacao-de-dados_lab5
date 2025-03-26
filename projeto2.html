@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ECharts</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+  </head>
+  <body>
+    <div>
+      <label for="filter">Filtrar:</label>
+      <select id="filter" onchange="updateChart()">
+        <option value="all">Todos</option>
+        <option value="positive">Variação Positiva</option>
+        <option value="negative">Variação Negativa</option>
+      </select>
+    </div>
+    <div id="main" style="width: 1320px; height: 900px;"></div>
+    <script type="text/javascript">
+      var myChart = echarts.init(document.getElementById('main'));
+      
+      var variacaoPluviometrica = [124.6, -17.9, -91.7, -83.5, 553.3, -266.9, 93.4, -202.8, 550.1, -562.0];
+      var categorias = ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023'];
+
+      function getFilteredData(filter) {
+        return variacaoPluviometrica.map(value => {
+          if (filter === 'positive' && value < 0) return null;
+          if (filter === 'negative' && value >= 0) return null;
+          return value;
+        });
+      }
+      
+      function updateChart() {
+        var filter = document.getElementById('filter').value;
+        var filteredData = getFilteredData(filter);
+        
+        var option = {
+          title: {
+            text: 'Variação da chuva acumulada por ano (2014 a 2023) - Fazenda Carnaúba - Taperoá - PB'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            },
+            formatter: '{c} mm'
+          },
+          grid: {
+            top: 80,
+            bottom: 80,
+            left: 150,
+            right: 80
+          },
+          xAxis: {
+            type: 'value',
+            position: 'top',
+            splitLine: {
+              lineStyle: {
+                type: 'dashed'
+              }
+            },
+            name: 'Chuva (mm)',
+            nameLocation: 'middle',
+            nameGap: 35
+          },
+          yAxis: {
+            type: 'category',
+            axisLine: { show: false },
+            axisLabel: { show: true },
+            axisTick: { show: false },
+            splitLine: { show: false },
+            data: categorias,
+            name: 'Ano',
+            nameLocation: 'middle',
+            nameGap: 50
+          },
+          series: [
+            {
+              name: 'Pluviosidade(mm)',
+              type: 'bar',
+              data: filteredData,
+              label: {
+                show: true,
+                position: 'right',
+                formatter: '{b}'
+              },
+              itemStyle: {
+                color: function(params) {
+                  return params.value < 0 ? 'red' : '#007bff';
+                }
+              }
+            }
+          ],
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100,
+              zoomLock: false,
+              yAxisIndex: [0]
+            },
+            {
+              type: 'slider',
+              show: true,
+              yAxisIndex: [0],
+              start: 0,
+              end: 100,
+              right: 20,
+              handleSize: '100%',
+              realtime: true
+            }
+          ]
+        };
+        
+        myChart.setOption(option);
+      }
+      
+      updateChart();
+    </script>
+  </body>
+</html>
